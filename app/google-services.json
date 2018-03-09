@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "786008749526",
+    "firebase_url": "https://hrmilestoneapp.firebaseio.com",
+    "project_id": "hrmilestoneapp",
+    "storage_bucket": "hrmilestoneapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:786008749526:android:120247d196457858",
+        "android_client_info": {
+          "package_name": "com.hrmilestoneapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "786008749526-evl43hi7ubbvoogc0fp3hl33s6po352m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hrmilestoneapp",
+            "certificate_hash": "67c112b0cd1b61723219047b1b2eda98a71a10d6"
+          }
+        },
+        {
+          "client_id": "786008749526-n2rvbsaq39pkv786ghnhnjhik52cloq0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASjO-LXuP5CE4WS6uVpu3Y7JWJ8M6_Zyk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "786008749526-n2rvbsaq39pkv786ghnhnjhik52cloq0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
