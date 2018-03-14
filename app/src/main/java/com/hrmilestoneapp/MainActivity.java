@@ -12,7 +12,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hrmilestoneapp.utils.PreferenceManager;
 
@@ -22,15 +24,18 @@ public class MainActivity extends AppCompatActivity
     NavigationView navigationView;
     Toolbar toolbar;
     Fragment fragment;
+    ImageView profile_imageview;
+    TextView tv_nav_user_name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -41,6 +46,24 @@ public class MainActivity extends AppCompatActivity
 
         View headerView = navigationView.getHeaderView(0);
         findHeader(headerView);
+        profile_imageview = headerView.findViewById(R.id.profile_imageview);
+        tv_nav_user_name = headerView.findViewById(R.id.tv_nav_user_name);
+
+        String f_name = PreferenceManager.getprefUserFirstName(this);
+        String l_name = PreferenceManager.getprefUserLastName(this);
+
+        tv_nav_user_name.setText(f_name + " " + l_name);
+
+        profile_imageview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(MainActivity.this, "Image View Clicked", Toast.LENGTH_LONG).show();
+                toolbar.setTitle(R.string.title_profile);
+                fragment = new ProfileFragment();
+                loadFragment(fragment);
+                drawer.closeDrawer(GravityCompat.START);
+            }
+        });
 
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -49,12 +72,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void findHeader(View headerView) {
-        TextView tvUserName = headerView.findViewById(R.id.tvUserName);
-        String userId = PreferenceManager.getprefUserId(MainActivity.this);
-        String user_fname = PreferenceManager.getprefUserFirstName(MainActivity.this);
-        String user_lname = PreferenceManager.getprefUserLastName(MainActivity.this);
 
-        //tvUserName.setText(user_fname + " " + user_lname);
     }
 
     @Override
@@ -101,6 +119,7 @@ public class MainActivity extends AppCompatActivity
             PreferenceManager.removePref(MainActivity.this, "USER_ID");
             PreferenceManager.removePref(MainActivity.this, "USER_FIRSTNAME");
             PreferenceManager.removePref(MainActivity.this, "USER_LASTNAME");
+            PreferenceManager.removePref(MainActivity.this, "USER_EMAIL");
 
             Intent i = new Intent(MainActivity.this, LoginScreen.class);
             startActivity(i);

@@ -87,6 +87,9 @@
     <string name="user_profile_company">Company</string>
     <string name="select_company_name">Select Company Name</string>
     <string name="experience">Experience</string>
+    <string name="remove_current_photo">Remove Current Photo</string>
+    <string name="take_picture">Take Picture</string>
+    <string name="choose_from_library">Choose From Library</string>
 
 
 </resources>

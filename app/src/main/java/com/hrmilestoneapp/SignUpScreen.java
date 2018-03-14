@@ -18,6 +18,8 @@ import android.widget.Spinner;
 
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -33,14 +35,21 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
     RadioButton rdb;
     Spinner txtInput_cmpyName, txtInput_exp;
 
+    FirebaseDatabase fdatabase = FirebaseDatabase.getInstance();
+    DatabaseReference fref;
+
     AwesomeValidation awesomeValidation;
 
     View view;
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_screen);
+
+        fref = fdatabase.getReference();
+        userId = fref.push().getKey();
 
         user_fname = findViewById(R.id.et_firstname);
         user_lname = findViewById(R.id.et_lastname);
@@ -84,16 +93,18 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
                     return;
                 } else {
 
-                    /*User user = new User();
-                    user.setUser_fname(user_fname.getText().toString());
-                    user.setUser_lname(user_lname.getText().toString());
-                    user.setUser_email(user_email.getText().toString());
-                    user.setUser_password(user_password.getText().toString());
-                    user.setUser_contact(user_contact.getText().toString());
-                    user.setUser_gender(rdb.getText().toString());
-                    user.setUser_birthdate(user_birthdate.getText().toString());*/
+                    User user = new User();
+                    user.setUser_fname(user_fname.getText().toString().trim());
+                    user.setUser_lname(user_lname.getText().toString().trim());
+                    user.setUser_email(user_email.getText().toString().trim());
+                    user.setUser_password(user_password.getText().toString().trim());
+                    user.setUser_contact(user_contact.getText().toString().trim());
+                    user.setUser_gender(rdb.getText().toString().trim());
+                    user.setUser_birthdate(user_birthdate.getText().toString().trim());
 
-                    next = new Intent(SignUpScreen.this, MainActivity.class);
+                    fref.child(userId).setValue(user);
+
+                    next = new Intent(SignUpScreen.this, LoginScreen.class);
                     startActivity(next);
                 }
                 break;

@@ -3,14 +3,17 @@ package com.hrmilestoneapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import butterknife.BindView;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener {
@@ -20,6 +23,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     Button btn_edit_profile;
     ListView lst_profile_timeline;
 
+    @BindView(R.id.bottom_sheet)
+    LinearLayout  layoutBottomSheet;
+
+    BottomSheetBehavior sheetBehavior;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -30,6 +37,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
+
+        //sheetBehavior  = BottomSheetBehavior.from(layoutBottomSheet);
 
         profile_image = view.findViewById(R.id.profile_image);
 
