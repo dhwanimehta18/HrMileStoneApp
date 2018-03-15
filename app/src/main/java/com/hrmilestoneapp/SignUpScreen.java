@@ -48,7 +48,7 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_screen);
 
-        fref = fdatabase.getReference();
+        fref = fdatabase.getReference("user");
         userId = fref.push().getKey();
 
         user_fname = findViewById(R.id.et_firstname);

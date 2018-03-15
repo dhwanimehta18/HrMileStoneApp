@@ -63,6 +63,8 @@
     <string name="tv_gender">Gender:</string>
     <string name="birthdate">Birthdate</string>
 
+    <string name="single_permission_text">(Click on FAB to check Single permission.\nTo test again, change the app permission in settings or reinstall the app)</string>
+
 
     <string name="nameerror">Enter a valid name</string>
     <string name="emailerror">Enter a valid email</string>

@@ -8,25 +8,24 @@
     android:orientation="vertical"
     android:padding="@dimen/activity_vertical_margin"
     app:behavior_hideable="true"
-    app:behavior_peekHeight="56dp"
-    app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+    app:behavior_peekHeight="56dp">
 
 
     <Button
         android:id="@+id/btn_remove_picture"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#E74C3C"
         android:background="@null"
         android:foreground="?attr/selectableItemBackground"
         android:text="@string/remove_current_photo"
         android:textAllCaps="false"
+        android:textColor="#E74C3C"
         android:textSize="15sp" />
 
     <View
-        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="2dp"
+        android:layout_marginTop="10dp"
         android:background="#777" />
 
     <Button
@@ -36,31 +35,31 @@
         android:background="@null"
         android:foreground="?attr/selectableItemBackground"
         android:text="@string/take_picture"
-        android:textColor="#3498DB"
         android:textAllCaps="false"
+        android:textColor="#3498DB"
         android:textSize="15sp" />
 
     <View
-        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="2dp"
+        android:layout_marginTop="10dp"
         android:background="#777" />
 
     <Button
         android:id="@+id/btn_choose_from_library"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#3498DB"
         android:background="@null"
         android:foreground="?attr/selectableItemBackground"
         android:text="@string/choose_from_library"
         android:textAllCaps="false"
+        android:textColor="#3498DB"
         android:textSize="15sp" />
 
     <View
-        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="2dp"
+        android:layout_marginTop="10dp"
         android:background="#777" />
 
     <Button
@@ -68,10 +67,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@null"
-        android:textColor="#3498DB"
         android:foreground="?attr/selectableItemBackground"
         android:text="@string/cancel"
         android:textAllCaps="false"
+        android:textColor="#3498DB"
         android:textSize="15sp" />
 
 </LinearLayout>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/photos_dialog"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#ECF0F1"
+    android:orientation="vertical"
+    android:padding="10dp"
+    app:behavior_hideable="true"
+    app:behavior_peekHeight="56dp">
+
+    <Button
+        android:id="@+id/btn_photos_take_picture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:foreground="?attr/selectableItemBackground"
+        android:text="@string/take_picture"
+        android:textAllCaps="false"
+        android:textColor="#3498DB"
+        android:textSize="15sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="10dp"
+        android:background="#777" />
+
+    <Button
+        android:id="@+id/btn_photos_choose_from_library"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:foreground="?attr/selectableItemBackground"
+        android:text="@string/choose_from_library"
+        android:textAllCaps="false"
+        android:textColor="#3498DB"
+        android:textSize="15sp" />
+
+</LinearLayout>

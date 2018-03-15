@@ -45,7 +45,7 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_screen);
 
-        fref = fdatabase.getReference();
+        fref = fdatabase.getReference("user");
         userId = fref.push().getKey();
 
         et_email = findViewById(R.id.et_email);
