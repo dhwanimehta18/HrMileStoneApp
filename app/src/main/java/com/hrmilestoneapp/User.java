@@ -5,6 +5,7 @@ package com.hrmilestoneapp;
  */
 
 public class User {
+    private String user_profile_picture;
     private String user_fname;
     private String user_lname;
     private String user_email;
@@ -12,8 +13,8 @@ public class User {
     private String user_birthdate;
     private String user_gender;
     private String user_contact;
-    //private String user_company;
-    //private String user_experience;
+    private String user_company;
+    private String user_experience;
 
     public String getUser_fname() {
         return user_fname;
@@ -71,7 +72,7 @@ public class User {
         this.user_contact = user_contact;
     }
 
-    /*public String getUser_company() {
+    public String getUser_company() {
         return user_company;
     }
 
@@ -85,5 +86,13 @@ public class User {
 
     public void setUser_experience(String user_experience) {
         this.user_experience = user_experience;
-    }*/
+    }
+
+    public String getUser_profile_picture() {
+        return user_profile_picture;
+    }
+
+    public void setUser_profile_picture(String user_profile_picture) {
+        this.user_profile_picture = user_profile_picture;
+    }
 }

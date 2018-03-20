@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
@@ -35,7 +36,6 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
     RadioButton rdb;
     Spinner txtInput_cmpyName, txtInput_exp;
 
-    FirebaseDatabase fdatabase = FirebaseDatabase.getInstance();
     DatabaseReference fref;
 
     AwesomeValidation awesomeValidation;
@@ -47,6 +47,7 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_screen);
+        FirebaseDatabase fdatabase = FirebaseDatabase.getInstance();
 
         fref = fdatabase.getReference("user");
         userId = fref.push().getKey();
@@ -66,6 +67,12 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
 
         user_birthdate = findViewById(R.id.birthdate);
         user_birthdate.setOnClickListener(SignUpScreen.this);
+
+        String company = txtInput_cmpyName.getSelectedItem().toString();
+        Log.i("company", "company : " + company);
+
+        String exp = txtInput_exp.getSelectedItem().toString();
+        Log.i("exp", "exp : " + exp);
 
         awesomeValidation = new AwesomeValidation(ValidationStyle.BASIC);
 
@@ -93,6 +100,12 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
                     return;
                 } else {
 
+                    String company = txtInput_cmpyName.getSelectedItem().toString();
+                    Log.i("company", "company : " + company);
+
+                    String exp = txtInput_exp.getSelectedItem().toString();
+                    Log.i("exp", "exp : " + exp);
+
                     User user = new User();
                     user.setUser_fname(user_fname.getText().toString().trim());
                     user.setUser_lname(user_lname.getText().toString().trim());
@@ -101,6 +114,8 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
                     user.setUser_contact(user_contact.getText().toString().trim());
                     user.setUser_gender(rdb.getText().toString().trim());
                     user.setUser_birthdate(user_birthdate.getText().toString().trim());
+                    user.setUser_company(txtInput_cmpyName.getSelectedItem().toString());
+                    user.setUser_experience(txtInput_exp.getSelectedItem().toString());
 
                     fref.child(userId).setValue(user);
 
@@ -176,5 +191,4 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
         }
         return true;
     }
-
 }

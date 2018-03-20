@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 public class PhotosAdapter extends BaseAdapter {
 
     private final FragmentActivity activity;
+    private int imgData[];
 
     public PhotosAdapter(FragmentActivity activity) {
         this.activity = activity;
@@ -23,7 +24,7 @@ public class PhotosAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return 0;
+        return imgData.length;
     }
 
     @Override
@@ -43,7 +44,12 @@ public class PhotosAdapter extends BaseAdapter {
         LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.photos_adapter, null);
 
         ImageView img_photo_list_adapter = ll.findViewById(R.id.img_photo_list_adapter);
+        img_photo_list_adapter.setImageResource(imgData[i]);
 
         return ll;
+    }
+
+    public void imageId(int[] imgData) {
+        this.imgData = imgData;
     }
 }

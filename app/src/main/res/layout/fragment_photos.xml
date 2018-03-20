@@ -4,14 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="@dimen/activity_vertical_margin"
     tools:context="com.hrmilestoneapp.PhotosFragment">
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="@dimen/nav_header_vertical_spacing">
+        android:orientation="vertical">
 
         <GridView
             android:id="@+id/grdPhotos"
@@ -19,7 +18,7 @@
             android:layout_height="wrap_content"
             android:horizontalSpacing="2dp"
             android:numColumns="3"
-            android:padding="@dimen/activity_vertical_margin">
+            android:verticalSpacing="5dp">
 
         </GridView>
     </LinearLayout>

@@ -66,9 +66,10 @@
                 android:layout_alignBaseline="@+id/user_profile_fname"
                 android:layout_alignBottom="@+id/user_profile_fname"
                 android:layout_alignParentEnd="true"
-                android:hint="@string/last_name"
+                android:editable="false"
+                android:hint="@string/first_name"
                 android:padding="16dp"
-                android:text="Om"
+                android:text="dhwani"
                 android:textColor="@color/hint_color"
                 android:textSize="20dp" />
 
@@ -92,7 +93,7 @@
                 android:layout_alignParentEnd="true"
                 android:hint="@string/last_name"
                 android:padding="16dp"
-                android:text="Shah"
+                android:text="mehta"
                 android:textColor="@color/hint_color"
                 android:textSize="20dp" />
 
@@ -118,7 +119,7 @@
                 android:hint="@string/hint_email"
                 android:inputType="textEmailAddress"
                 android:padding="16dp"
-                android:text="omshah@gmail.com"
+                android:text="dhwani@gmail.com"
                 android:textColor="@color/hint_color"
                 android:textSize="20dp" />
 
@@ -144,7 +145,7 @@
                 android:hint="@string/contact"
                 android:inputType="number"
                 android:padding="16dp"
-                android:text="123456789"
+                android:text="1234567890"
                 android:textColor="@color/hint_color"
                 android:textSize="20dp" />
 
@@ -170,7 +171,7 @@
                 android:hint="@string/user_profile_company"
                 android:inputType="number"
                 android:padding="16dp"
-                android:text="Infostretch"
+                android:text="Tata Consultancy Company"
                 android:textColor="@color/hint_color"
                 android:textSize="20dp" />
 
@@ -181,7 +182,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_below="@+id/tv_user_profile_company"
                 android:padding="16dp"
-                android:text="@string/user_profile_company"
+                android:text="@string/experience"
                 android:textColor="#000"
                 android:textSize="20dp" />
 
@@ -193,28 +194,83 @@
                 android:layout_alignBottom="@+id/et_user_profile_company"
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="100dp"
-                android:hint="@string/user_profile_company"
+                android:hint="@string/experience"
                 android:inputType="number"
                 android:padding="16dp"
-                android:text="1 year"
+                android:text="0-2"
                 android:textColor="@color/hint_color"
                 android:textSize="20dp" />
 
-            <Button
-                android:id="@+id/btn_profile_save"
-                android:layout_width="match_parent"
+
+            <TextView
+                android:id="@+id/tv_user_gender"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/et_user_profile_exp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginTop="10dp"
-                android:background="@color/bg_main"
-                android:text="Save"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/tv_user_profile_exp"
+                android:padding="16dp"
+                android:text="@string/tv_gender"
+                android:textColor="#000"
+                android:textSize="20dp" />
+
+            <EditText
+                android:id="@+id/et_user_gender"
+                android:layout_width="255dp"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/tv_user_gender"
+                android:layout_alignBottom="@+id/et_user_profile_exp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="100dp"
+                android:editable="false"
+                android:hint="@string/user_profile_company"
+                android:inputType="number"
+                android:padding="16dp"
+                android:text="Female"
+                android:textColor="@color/hint_color"
+                android:textSize="20dp" />
+
+
+            <TextView
+                android:id="@+id/tv_user_birthdate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/tv_user_gender"
+                android:padding="16dp"
+                android:text="@string/birthdate"
+                android:textColor="#000"
+                android:textSize="20dp" />
+
+            <EditText
+                android:id="@+id/et_user_birthdate"
+                android:layout_width="255dp"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/tv_user_birthdate"
+                android:layout_alignBottom="@+id/et_user_gender"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="100dp"
+                android:editable="false"
+                android:hint="@string/birthdate"
+                android:inputType="text"
+                android:padding="16dp"
+                android:text="1995-01-29"
+                android:textColor="@color/hint_color"
+                android:textSize="20dp" />
 
         </RelativeLayout>
 
+        <Button
+            android:id="@+id/btn_profile_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/bg_main"
+            android:text="Save"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
 
     </LinearLayout>
 </ScrollView>

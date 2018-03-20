@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "786008749526-g49j430549sf3edm9bt13mnodtijkrjd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hrmilestoneapp",
+            "certificate_hash": "a7405b9f48b298042281252ad71585f237ca4729"
+          }
+        },
+        {
           "client_id": "786008749526-evl43hi7ubbvoogc0fp3hl33s6po352m.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

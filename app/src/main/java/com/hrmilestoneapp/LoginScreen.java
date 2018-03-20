@@ -90,6 +90,8 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
 
                                     Intent next = new Intent(LoginScreen.this, MainActivity.class);
                                     startActivity(next);
+                                    finish();
+
                                 } else if (fEmail.equals(et_email.getText().toString().trim()) && !fPassword.equals(et_password.getText().toString().trim())) {
                                     Snackbar.make(view, "Password is incorrect", Snackbar.LENGTH_LONG).show();
                                 } else if (!fEmail.equals(et_email.getText().toString().trim()) && fPassword.equals(et_password.getText().toString().trim())) {

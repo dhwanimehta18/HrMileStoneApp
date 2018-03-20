@@ -1,8 +1,13 @@
 package com.hrmilestoneapp;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -10,36 +15,114 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.EditText;
+import android.widget.TextView;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.net.URI;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class EditProfileActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private URI mMediaUri;
-    public static final int MEDIA_TYPE_IMAGE = 2;
+    private int REQUEST_CAMERA = 0, SELECT_FILE = 1;
+    private String userChoosenTask;
 
-    private static final int EXTERNAL_STORAGE_PERMISSION_CONSTANT = 100;
-    private static final int REQUEST_PERMISSION_SETTING = 101;
-    private boolean sentToSettings = false;
-    private SharedPreferences permissionStatus;
+    FirebaseDatabase fdatabase = FirebaseDatabase.getInstance();
+    DatabaseReference fref;
+    String userId;
+
+    String fname, lname, email, contact, company, experience, birthdate, gender;
+
+    TextView user_profile_fname, user_profile_lname, user_profile_email, tv_user_profile_contact, tv_user_profile_company;
+    TextView tv_user_profile_exp, tv_user_gender, tv_user_birthdate;
+    EditText et_user_profile_exp, et_user_gender, et_user_birthdate;
+    EditText user_profile_f_name, user_profile_l_name, profile_email, et_user_profile_contact, et_user_profile_company;
+    Button btn_profile_save;
 
     CircleImageView edit_profile_image;
     Dialog dialog;
-    Button btn_remove_picture, btn_take_picture, btn_choose_from_library, btn_cancel_profile_pic;
-    private int TAKE_PIC_REQUEST_CODE = 0;
+    Button btn_edit_profile_picture, btn_remove_picture, btn_take_picture, btn_choose_from_library, btn_cancel_profile_pic;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
 
+        fref = fdatabase.getReference("user");
+        userId = fref.push().getKey();
+
+        Log.i("usreId", "userId : " + userId);
+
+
+        et_user_profile_exp = findViewById(R.id.et_user_profile_exp);
+        et_user_gender = findViewById(R.id.et_user_gender);
+        et_user_birthdate = findViewById(R.id.et_user_birthdate);
+        user_profile_f_name = findViewById(R.id.user_profile_f_name);
+        user_profile_l_name = findViewById(R.id.user_profile_l_name);
+        profile_email = findViewById(R.id.profile_email);
+        et_user_profile_contact = findViewById(R.id.et_user_profile_contact);
+        et_user_profile_company = findViewById(R.id.et_user_profile_company);
+
+        btn_profile_save = findViewById(R.id.btn_profile_save);
+
+        user_profile_fname = findViewById(R.id.user_profile_fname);
+        user_profile_lname = findViewById(R.id.user_profile_lname);
+        user_profile_email = findViewById(R.id.user_profile_email);
+        tv_user_profile_contact = findViewById(R.id.tv_user_profile_contact);
+        tv_user_profile_company = findViewById(R.id.tv_user_profile_company);
+        tv_user_profile_exp = findViewById(R.id.tv_user_profile_exp);
+        tv_user_gender = findViewById(R.id.tv_user_gender);
+        tv_user_birthdate = findViewById(R.id.tv_user_birthdate);
+
+
+        btn_edit_profile_picture = findViewById(R.id.btn_edit_profile_picture);
+
+        /*fref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    User user = snapshot.getValue(User.class);
+                    fname = user.getUser_fname();
+                    Log.i("fname", "fname : " + fname);
+                    lname = user.getUser_lname();
+                    email = user.getUser_email();
+                    contact = user.getUser_contact();
+                    company = user.getUser_company();
+                    experience = user.getUser_experience();
+                    gender = user.getUser_gender();
+                    birthdate = user.getUser_birthdate();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        et_user_birthdate.setText(birthdate);
+        user_profile_f_name.setText(fname);
+        user_profile_l_name.setText(lname);
+        profile_email.setText(email);
+        et_user_profile_contact.setText(contact);
+        et_user_profile_company.setText(company);
+        et_user_profile_exp.setText(experience);
+        et_user_gender.setText(gender);*/
+
         edit_profile_image = findViewById(R.id.edit_profile_image);
 
         edit_profile_image.setOnClickListener(EditProfileActivity.this);
+
 
     }
 
@@ -47,172 +130,134 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnCli
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.edit_profile_image:
-                customDialog();
+                selectImage();
+                //customDialog();
                 break;
-            case R.id.btn_cancel_profile_pic:
-                dialog.dismiss();
-                break;
-            case R.id.btn_take_picture:
-                Log.i("btn_take_picture", "btn_take_picture");
-
-
-                /*if (ActivityCompat.checkSelfPermission(EditProfileActivity.this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(EditProfileActivity.this, android.Manifest.permission.CAMERA)) {
-                        //Show Information about why you need the permission
-                        AlertDialog.Builder builder = new AlertDialog.Builder(EditProfileActivity.this);
-                        builder.setTitle("Need Storage Permission");
-                        builder.setMessage("This app needs storage permission.");
-                        builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                                ActivityCompat.requestPermissions(EditProfileActivity.this, new String[]{android.Manifest.permission.CAMERA}, EXTERNAL_STORAGE_PERMISSION_CONSTANT);
-                            }
-                        });
-                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        });
-                        builder.show();
-                    } else if (permissionStatus.getBoolean(android.Manifest.permission.CAMERA, false)) {
-                        //Previously Permission Request was cancelled with 'Dont Ask Again',
-                        // Redirect to Settings after showing Information about why you need the permission
-                        AlertDialog.Builder builder = new AlertDialog.Builder(EditProfileActivity.this);
-                        builder.setTitle("Need Storage Permission");
-                        builder.setMessage("This app needs storage permission.");
-                        builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                                sentToSettings = true;
-                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                Uri uri = Uri.fromParts("package", getPackageName(), null);
-                                intent.setData(uri);
-                                startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
-                                Toast.makeText(getBaseContext(), "Go to Permissions to Grant Storage", Toast.LENGTH_LONG).show();
-                            }
-                        });
-                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        });
-                        builder.show();
-                    } else {
-                        //just request the permission
-                    }
-                    ActivityCompat.requestPermissions(EditProfileActivity.this, new String[]{android.Manifest.permission.CAMERA}, EXTERNAL_STORAGE_PERMISSION_CONSTANT);
-
-                    SharedPreferences.Editor editor = permissionStatus.edit();
-                    editor.putBoolean(android.Manifest.permission.CAMERA, true);
-                    editor.commit();
-
-
-                } else {
-                    //You already have the permission, just go ahead.*/
-                    proceedAfterPermission();
-                //}
+            case R.id.btn_edit_profile_picture:
+                selectImage();
                 break;
         }
     }
 
-    private void proceedAfterPermission() {
-        Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivity(takePicture);
-        mMediaUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
-        if (mMediaUri == null) {
-            Toast.makeText(getApplicationContext(), "Sorry there was an error! Try again.", Toast.LENGTH_LONG).show();
-            //mSaveChangesBtn.setEnabled(false);
-        } else {
-            takePicture.putExtra(MediaStore.EXTRA_OUTPUT, mMediaUri);
-            startActivityForResult(takePicture, TAKE_PIC_REQUEST_CODE);
-
-            //mSaveChangesBtn.setEnabled(true);
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case Utility.MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (userChoosenTask.equals("Take Photo"))
+                        cameraIntent();
+                    else if (userChoosenTask.equals("Choose from Library"))
+                        galleryIntent();
+                } else {
+                    //code for deny
+                }
+                break;
         }
     }
 
-    /*@Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == EXTERNAL_STORAGE_PERMISSION_CONSTANT) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //The External Storage Write Permission is granted to you... Continue your left job...
-                proceedAfterPermission();
-            } else {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(EditProfileActivity.this, android.Manifest.permission.CAMERA)) {
-                    //Show Information about why you need the permission
-                    AlertDialog.Builder builder = new AlertDialog.Builder(EditProfileActivity.this);
-                    builder.setTitle("Need Storage Permission");
-                    builder.setMessage("This app needs storage permission");
-                    builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
+    private void selectImage() {
+        final CharSequence[] items = {"Remove Photo", "Take Photo", "Choose from Library",
+                "Cancel"};
 
-                            ActivityCompat.requestPermissions(EditProfileActivity.this, new String[]{Manifest.permission.CAMERA}, EXTERNAL_STORAGE_PERMISSION_CONSTANT);
-                        }
-                    });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
-                    builder.show();
-                } else {
-                    Toast.makeText(getBaseContext(), "Unable to get Permission", Toast.LENGTH_LONG).show();
+        AlertDialog.Builder builder = new AlertDialog.Builder(EditProfileActivity.this);
+        builder.setTitle("Add Photo!");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int item) {
+                boolean result = Utility.checkPermission(EditProfileActivity.this);
+
+                if (items[item].equals("Take Photo")) {
+                    userChoosenTask = "Take Photo";
+                    if (result)
+                        cameraIntent();
+
+                } else if (items[item].equals("Choose from Library")) {
+                    userChoosenTask = "Choose from Library";
+                    if (result)
+                        galleryIntent();
+
+                } else if (items[item].equals("Cancel")) {
+                    dialog.dismiss();
+                } else if (items[item].equals("Remove Photo")) {
+                    userChoosenTask = "Choose from Library";
+                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.hrlist_icon);
+                    edit_profile_image.setImageResource(R.drawable.hrlist_icon);
+                    Log.i("imagePath", "imagePath : " + bitmap.toString());
+                    dialog.dismiss();
                 }
             }
-        }
+        });
+        builder.show();
     }
 
+    private void galleryIntent() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);//
+        startActivityForResult(Intent.createChooser(intent, "Select File"), SELECT_FILE);
+    }
+
+    private void cameraIntent() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(intent, REQUEST_CAMERA);
+    }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_PERMISSION_SETTING) {
-            if (ActivityCompat.checkSelfPermission(EditProfileActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                //Got Permission
-                proceedAfterPermission();
+
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == SELECT_FILE)
+                onSelectFromGalleryResult(data);
+            else if (requestCode == REQUEST_CAMERA)
+                onCaptureImageResult(data);
+        }
+    }
+
+    private void onCaptureImageResult(Intent data) {
+        Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+
+        File destination = new File(Environment.getExternalStorageDirectory(),
+                System.currentTimeMillis() + ".jpg");
+
+        FileOutputStream fo;
+        try {
+            destination.createNewFile();
+            fo = new FileOutputStream(destination);
+            fo.write(bytes.toByteArray());
+            fo.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        edit_profile_image.setImageBitmap(thumbnail);
+        Log.i("imagePath", "imagePath : " + thumbnail.toString());
+    }
+
+    @SuppressWarnings("deprecation")
+    private void onSelectFromGalleryResult(Intent data) {
+
+        Bitmap bm = null;
+        if (data != null) {
+            try {
+                bm = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), data.getData());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
+
+        edit_profile_image.setImageBitmap(bm);
+        Log.i("imagePath", "imagePath : " + bm.toString());
     }
 
 
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
-        if (sentToSettings) {
-            if (ActivityCompat.checkSelfPermission(EditProfileActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                //Got Permission
-                proceedAfterPermission();
-            }
-        }
-    }*/
 
 
-    private URI getOutputMediaFileUri(int mediaTypeImage) {
-
-        if (isExternalStorageAvailable()) {
-            File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "UPLOADIMAGES");
-        }
-
-        return null;
-    }
-
-    private boolean isExternalStorageAvailable() {
-        String state = Environment.getExternalStorageState();
-        if (state.equals(Environment.MEDIA_MOUNTED)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private void customDialog() {
+    /*private void customDialog() {
 
         dialog = new Dialog(EditProfileActivity.this);
         dialog.setContentView(R.layout.bottom_sheet);
@@ -225,6 +270,8 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnCli
 
         btn_cancel_profile_pic.setOnClickListener(EditProfileActivity.this);
         btn_take_picture.setOnClickListener(EditProfileActivity.this);
+        btn_choose_from_library.setOnClickListener(EditProfileActivity.this);
+        btn_remove_picture.setOnClickListener(EditProfileActivity.this);
 
-    }
+    }*/
 }
