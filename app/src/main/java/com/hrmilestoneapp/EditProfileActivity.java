@@ -18,8 +18,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.hrmilestoneapp.utils.PreferenceManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -33,6 +37,7 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnCli
 
     private int REQUEST_CAMERA = 0, SELECT_FILE = 1;
     private String userChoosenTask;
+
 
     FirebaseDatabase fdatabase = FirebaseDatabase.getInstance();
     DatabaseReference fref;
@@ -55,6 +60,9 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
+
+        final String EMAIL_ID = PreferenceManager.getprefUserEmail(this);
+        Log.i("email_Id", "email_id" + EMAIL_ID);
 
         fref = fdatabase.getReference("user");
         userId = fref.push().getKey();
@@ -82,24 +90,41 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnCli
         tv_user_gender = findViewById(R.id.tv_user_gender);
         tv_user_birthdate = findViewById(R.id.tv_user_birthdate);
 
+        edit_profile_image = findViewById(R.id.edit_profile_image);
+
+        edit_profile_image.setOnClickListener(EditProfileActivity.this);
 
         btn_edit_profile_picture = findViewById(R.id.btn_edit_profile_picture);
 
-        /*fref.addValueEventListener(new ValueEventListener() {
+        fref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     User user = snapshot.getValue(User.class);
-                    fname = user.getUser_fname();
-                    Log.i("fname", "fname : " + fname);
-                    lname = user.getUser_lname();
-                    email = user.getUser_email();
-                    contact = user.getUser_contact();
-                    company = user.getUser_company();
-                    experience = user.getUser_experience();
-                    gender = user.getUser_gender();
-                    birthdate = user.getUser_birthdate();
+                    String fEmail = user.getUser_email();
+
+                    if(EMAIL_ID.equals(fEmail)) {
+                        fname = user.getUser_fname();
+                        Log.i("fname", "fname : " + fname);
+                        lname = user.getUser_lname();
+                        email = user.getUser_email();
+                        contact = user.getUser_contact();
+                        company = user.getUser_company();
+                        experience = user.getUser_experience();
+                        gender = user.getUser_gender();
+                        birthdate = user.getUser_birthdate();
+
+                        et_user_birthdate.setText(birthdate);
+                        user_profile_f_name.setText(fname);
+                        user_profile_l_name.setText(lname);
+                        profile_email.setText(email);
+                        et_user_profile_contact.setText(contact);
+                        et_user_profile_company.setText(company);
+                        et_user_profile_exp.setText(experience);
+                        et_user_gender.setText(gender);
+
+                    }
                 }
 
             }
@@ -109,21 +134,6 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnCli
 
             }
         });
-
-        et_user_birthdate.setText(birthdate);
-        user_profile_f_name.setText(fname);
-        user_profile_l_name.setText(lname);
-        profile_email.setText(email);
-        et_user_profile_contact.setText(contact);
-        et_user_profile_company.setText(company);
-        et_user_profile_exp.setText(experience);
-        et_user_gender.setText(gender);*/
-
-        edit_profile_image = findViewById(R.id.edit_profile_image);
-
-        edit_profile_image.setOnClickListener(EditProfileActivity.this);
-
-
     }
 
     @Override

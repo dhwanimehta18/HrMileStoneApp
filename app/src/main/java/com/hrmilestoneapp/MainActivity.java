@@ -108,6 +108,10 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_msg) {
 
+            toolbar.setTitle("Messege");
+            fragment = new MessegeFragment();
+            loadFragment(fragment);
+
         } else if (id == R.id.nav_profile) {
 
             toolbar.setTitle(R.string.title_profile);
