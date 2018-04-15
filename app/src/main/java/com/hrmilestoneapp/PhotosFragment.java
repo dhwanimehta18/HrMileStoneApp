@@ -8,64 +8,125 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.ImageView;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.hrmilestoneapp.utils.PreferenceManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 public class PhotosFragment extends Fragment implements View.OnClickListener {
 
     FloatingActionButton fab;
+    String encoded;
+    Photos photos;
+    String date;
+    String time;
 
 
     private int REQUEST_CAMERA = 0, SELECT_FILE = 1;
     private String userChoosenTask;
-    ImageView imgtemp;
+    //ImageView imgtemp;
+
+    ArrayList<Photos> photosArrayList;
 
     View view;
+    String userFname;
+    String userLname;
     Dialog dialog;
     Button btn_photo_take_picture, btn_photo_choose_from_library;
 
     GridView grdPhotos;
-    int[] imgData = {R.drawable.temp, R.drawable.tempp, R.drawable.temppp, R.drawable.tempppp};
+    DatabaseReference fref;
+    String photoId;
+    String userId;
+    //int[] imgData = {R.drawable.temp, R.drawable.tempp, R.drawable.temppp, R.drawable.tempppp};
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
+
+        userId = PreferenceManager.getprefUserKey(getActivity());
+        userFname = PreferenceManager.getprefUserFirstName(getActivity());
+        userLname = PreferenceManager.getprefUserLastName(getActivity());
         view = inflater.inflate(R.layout.fragment_photos, container, false);
 
         //imgtemp = view.findViewById(R.id.imgtemp);
 
         grdPhotos = view.findViewById(R.id.grdPhotos);
+        /*grdPhotos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Dialog dialog = new Dialog(getActivity());
+                dialog.setContentView(R.layout.photos_dialog);
+                TextView tv_photo_upload_time = dialog.findViewById(R.id.tv_photo_upload_time);
+                TextView tv_photos_upload_name = dialog.findViewById(R.id.tv_photos_upload_name);
+                tv_photo_upload_time.setText(photos.getTime() + " " + photos.getDate());
+                tv_photos_upload_name.setText(photos.getUserFName() + " " + photos.getUserLName());
 
-        PhotosAdapter adapter = new PhotosAdapter(getActivity());
-        adapter.imageId(imgData);
-        grdPhotos.setAdapter(adapter);
+                dialog.show();
+
+                //Toast.makeText(getActivity(), "" + photos.getUserId(), Toast.LENGTH_LONG).show();
+            }
+        });*/
+
+        FirebaseDatabase fdatabase = FirebaseDatabase.getInstance();
+        fref = fdatabase.getReference("photos");
+        photosArrayList = new ArrayList<Photos>();
+        photoId = fref.push().getKey();
+
+        fref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    photos = snapshot.getValue(Photos.class);
+                    photosArrayList.add(photos);
+                    setData(photosArrayList);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         fab = view.findViewById(R.id.fab);
         fab.setOnClickListener(PhotosFragment.this);
 
-        //get the permissions we have asked for before but are not granted..
-        //we will store this in a global list to access later.
-
-
         return view;
+    }
+
+    private void setData(ArrayList<Photos> photosArrayList) {
+        PhotosAdapter photosAdapter = new PhotosAdapter(getActivity(), photosArrayList);
+        //photosAdapter.notifyDataSetChanged();
+        grdPhotos.setAdapter(photosAdapter);
     }
 
     @Override
@@ -89,13 +150,15 @@ public class PhotosFragment extends Fragment implements View.OnClickListener {
                         galleryIntent();
                 } else {
                     //code for deny
+                    Snackbar.make(view, "Permissions not granted", Snackbar.LENGTH_LONG).show();
                 }
                 break;
         }
     }
 
+
     private void selectImage() {
-        final CharSequence[] items = {"Remove Photo", "Take Photo", "Choose from Library",
+        final CharSequence[] items = {"Take Photo", "Choose from Library",
                 "Cancel"};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -119,7 +182,9 @@ public class PhotosFragment extends Fragment implements View.OnClickListener {
                     dialog.dismiss();
                 } else if (items[item].equals("Remove Photo")) {
                     userChoosenTask = "Choose from Library";
-                    imgtemp.setImageResource(R.drawable.hrlist_icon);
+                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.hrlist_icon);
+                    //imgtemp.setImageResource(R.drawable.event_pic);
+                    Log.i("imagePath", "imagePath : " + bitmap.toString());
                     dialog.dismiss();
                 }
             }
@@ -130,7 +195,7 @@ public class PhotosFragment extends Fragment implements View.OnClickListener {
     private void galleryIntent() {
         Intent intent = new Intent();
         intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);//
+        intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select File"), SELECT_FILE);
     }
 
@@ -171,31 +236,53 @@ public class PhotosFragment extends Fragment implements View.OnClickListener {
             e.printStackTrace();
         }
 
-        imgtemp.setImageBitmap(thumbnail);
+        byte[] byteArray = bytes.toByteArray();
+        //imgtemp.setImageBitmap(thumbnail);
+        encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+        //Firebase insert
+        Photos photos = new Photos();
+        date = DateTime.Date();
+        time = DateTime.Time();
+        photos.setUserId(userId);
+        photos.setPhotoPath(encoded);
+        photos.setDate(date);
+        photos.setTime(time);
+        photos.setUserFName(userFname);
+        photos.setUserLName(userLname);
+        fref.child(photoId).setValue(photos);
+        Log.i("encoded", "encoded : " + encoded);
     }
 
     @SuppressWarnings("deprecation")
     private void onSelectFromGalleryResult(Intent data) {
-
         Bitmap bm = null;
         if (data != null) {
             try {
                 bm = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), data.getData());
+
+                //Bitmap bm = (Bitmap) data.getExtras().get("data");
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                bm.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+
+                byte[] byteArray = bytes.toByteArray();
+                //imgtemp.setImageBitmap(bm);
+                encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        imgtemp.setImageBitmap(bm);
-    }
-
-
-    private void photoDialog() {
-        dialog = new Dialog(getActivity());
-        dialog.setContentView(R.layout.photos_dialog);
-        btn_photo_choose_from_library = dialog.findViewById(R.id.btn_photos_choose_from_library);
-        btn_photo_take_picture = dialog.findViewById(R.id.btn_photos_take_picture);
-
-        dialog.show();
+        //imgtemp.setImageBitmap(bm);
+        Photos photos = new Photos();
+        String date1 = DateTime.Date();
+        String time1 = DateTime.Time();
+        photos.setUserId(userId);
+        photos.setPhotoPath(encoded);
+        photos.setDate(date1);
+        photos.setTime(time1);
+        photos.setUserFName(userFname);
+        photos.setUserLName(userLname);
+        fref.child(photoId).setValue(photos);
+        Log.i("imagePath", "imagePath : " + bm.toString());
     }
 }

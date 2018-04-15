@@ -75,7 +75,10 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:textColor="@color/hint_color"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    app:passwordToggleEnabled = "true"
+                    app:passwordToggleTint="@color/input_register_hint"
+                    app:passwordToggleDrawable="@drawable/ic_remove_red_eye_black_24dp"/>
             </android.support.design.widget.TextInputLayout>
 
             <LinearLayout

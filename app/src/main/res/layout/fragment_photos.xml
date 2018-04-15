@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+
         <GridView
             android:id="@+id/grdPhotos"
             android:layout_width="match_parent"

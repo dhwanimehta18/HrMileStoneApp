@@ -5,6 +5,7 @@ package com.hrmilestoneapp;
  */
 
 public class User {
+    private String userKey;
     private String user_profile_picture;
     private String user_fname;
     private String user_lname;
@@ -15,6 +16,16 @@ public class User {
     private String user_contact;
     private String user_company;
     private String user_experience;
+    private String path;
+    private String password;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public String getUser_fname() {
         return user_fname;
@@ -94,5 +105,21 @@ public class User {
 
     public void setUser_profile_picture(String user_profile_picture) {
         this.user_profile_picture = user_profile_picture;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getUserKey() {
+        return userKey;
+    }
+
+    public void setUserKey(String userKey) {
+        this.userKey = userKey;
     }
 }

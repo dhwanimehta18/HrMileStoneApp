@@ -1,14 +1,19 @@
 package com.hrmilestoneapp;
 
-import android.content.Context;
-import android.support.design.widget.CoordinatorLayout;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v4.app.FragmentActivity;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
 
 /**
  * Created by admin0 on 22-Feb-18.
@@ -21,53 +26,73 @@ public class EventListAdapter extends BaseAdapter {
     int[] event_pic;
     int[] event_date;
     String[] event_name;
+    ArrayList<Events> eventsArrayList;
 
 
-    public EventListAdapter(FragmentActivity activity) {
+    public EventListAdapter(FragmentActivity activity, ArrayList<Events> eventsArrayList) {
         this.activity = activity;
+        this.eventsArrayList = eventsArrayList;
     }
 
     @Override
     public int getCount() {
-        return event_pic.length;
+        return eventsArrayList.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return null;
+        return eventsArrayList.get(i);
     }
 
     @Override
     public long getItemId(int i) {
-        return 0;
+
+        return i;
     }
 
     @Override
     public View getView(int position, View view, ViewGroup viewGroup) {
 
-        LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        CoordinatorLayout ll = (CoordinatorLayout) inflater.inflate(R.layout.event_list_adapter, null);
 
-        ImageView event_banner = ll.findViewById(R.id.event_banner);
-        ImageView eventdate = ll.findViewById(R.id.event_date);
-        TextView tv_event_title = ll.findViewById(R.id.tv_event_title);
+        ViewHolder holder;
 
-        event_banner.setImageResource(event_pic[position]);
-        eventdate.setImageResource(event_date[position]);
-        tv_event_title.setText(event_name[position]);
+        if (view == null) {
+            holder = new ViewHolder();
+            view = LayoutInflater.from(activity).inflate(R.layout.event_list_adapter, viewGroup, false);
+            holder.event_banner = view.findViewById(R.id.event_banner);
+            holder.eventdate = view.findViewById(R.id.event_date);
+            holder.tv_event_title = view.findViewById(R.id.tv_event_title);
+            view.setTag(holder);
 
-        return ll;
+        } else {
+            holder = (ViewHolder) view.getTag();
+        }
+        final Events events = (Events) getItem(position);
+        String imgpath = events.getImg_banner();
+        if (imgpath != null && !imgpath.isEmpty()) {
+            byte[] decoded = Base64.decode(imgpath, Base64.DEFAULT);
+            Bitmap decodedImage = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+            holder.event_banner.setImageBitmap(decodedImage);
+        }
+        holder.eventdate.setText(events.getEvent_date());
+        holder.tv_event_title.setText(events.getEvent_name());
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent next = new Intent(activity, ModifyEvent.class);
+                next.putExtra("EVENT_ID", events.getEvent_id());
+                next.putExtra("USER_ID", events.getUserId());
+                activity.startActivity(next);
+                Toast.makeText(activity, "Event : " + events.getEvent_name(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        return view;
     }
 
-    public void eventPic(int[] event_pic) {
-        this.event_pic = event_pic;
-    }
-
-    public void eventDate(int[] event_date) {
-        this.event_date = event_date;
-    }
-
-    public void eventName(String[] event_name) {
-        this.event_name = event_name;
+    class ViewHolder {
+        ImageView event_banner;
+        TextView eventdate;
+        TextView tv_event_title;
     }
 }

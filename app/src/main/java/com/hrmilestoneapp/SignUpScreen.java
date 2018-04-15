@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -16,11 +17,16 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.Toast;
 
-import com.basgeekball.awesomevalidation.AwesomeValidation;
-import com.basgeekball.awesomevalidation.ValidationStyle;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.hrmilestoneapp.utils.CommonUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -35,13 +41,15 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
     RadioGroup rdgrp;
     RadioButton rdb;
     Spinner txtInput_cmpyName, txtInput_exp;
-
+    String number;
     DatabaseReference fref;
+    FirebaseAuth mAuth;
 
-    AwesomeValidation awesomeValidation;
+//    AwesomeValidation awesomeValidation;
 
     View view;
     private String userId;
+    private FirebaseUser currentFirebaseUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +59,7 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
 
         fref = fdatabase.getReference("user");
         userId = fref.push().getKey();
+        mAuth = FirebaseAuth.getInstance();
 
         user_fname = findViewById(R.id.et_firstname);
         user_lname = findViewById(R.id.et_lastname);
@@ -58,11 +67,13 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
         user_password = findViewById(R.id.txtEdit_pwd);
         txtEdit_cnf_pwd = findViewById(R.id.txtEdit_cnf_pwd);
         user_contact = findViewById(R.id.txtEdit_number);
+        number = user_contact.getText().toString();
         rdgrp = findViewById(R.id.rdgrp);
         txtInput_cmpyName = findViewById(R.id.txtInput_cmpyName);
         txtInput_exp = findViewById(R.id.txtInput_exp);
 
         btn_signup = findViewById(R.id.btn_signup);
+
         btn_signup.setOnClickListener(SignUpScreen.this);
 
         user_birthdate = findViewById(R.id.birthdate);
@@ -74,7 +85,7 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
         String exp = txtInput_exp.getSelectedItem().toString();
         Log.i("exp", "exp : " + exp);
 
-        awesomeValidation = new AwesomeValidation(ValidationStyle.BASIC);
+//        awesomeValidation = new AwesomeValidation(ValidationStyle.BASIC);
 
         //awesomeValidation.addValidation(this, R.id.txtEdit_number, "^[A-Za-z\\s]{1,}[\\.]{0,1}[A-Za-z\\s]{0,}$", R.string.numbererror);
 
@@ -88,17 +99,22 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
         switch (view.getId()) {
             case R.id.btn_signup:
 
-                if (!validateName()) {
+                if (!CommonUtil.checkFirstLastName(user_fname.getText().toString().trim())) {
+                    user_fname.setError("Numbers not allowed");
                     return;
-                } else if (!validateEmail()) {
+                } else if (!CommonUtil.checkFirstLastName(user_lname.getText().toString().trim())) {
+                    user_lname.setError("Numbers not allowed");
+                } else if (!CommonUtil.checkEmail(user_email.getText().toString().trim())) {
+                    user_email.setError("Enter a valid email");
                     return;
                 } else if (!validatePassword()) {
                     return;
                 } else if (!validateConfirmPassword()) {
                     return;
-                } else if (!awesomeValidation.validate()) {
+                } else if (!validateNumber()) {
                     return;
                 } else {
+
 
                     String company = txtInput_cmpyName.getSelectedItem().toString();
                     Log.i("company", "company : " + company);
@@ -106,7 +122,8 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
                     String exp = txtInput_exp.getSelectedItem().toString();
                     Log.i("exp", "exp : " + exp);
 
-                    User user = new User();
+                    /*User user = new User();
+                    user.setUserKey(userId);
                     user.setUser_fname(user_fname.getText().toString().trim());
                     user.setUser_lname(user_lname.getText().toString().trim());
                     user.setUser_email(user_email.getText().toString().trim());
@@ -117,10 +134,12 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
                     user.setUser_company(txtInput_cmpyName.getSelectedItem().toString());
                     user.setUser_experience(txtInput_exp.getSelectedItem().toString());
 
-                    fref.child(userId).setValue(user);
+                    fref.child(userId).setValue(user);*/
+                    signup1();
 
-                    next = new Intent(SignUpScreen.this, LoginScreen.class);
+                    /*next = new Intent(SignUpScreen.this, LoginScreen.class);
                     startActivity(next);
+                    finish();*/
                 }
                 break;
             case R.id.birthdate:
@@ -140,6 +159,67 @@ public class SignUpScreen extends AppCompatActivity implements View.OnClickListe
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
                 dialog.show();
+        }
+    }
+
+    private void signup1() {
+        mAuth.createUserWithEmailAndPassword(user_email.getText().toString().trim(), user_password.getText().toString().trim()).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+
+                Toast.makeText(SignUpScreen.this, "createUserWithEmail:onComplete: " + task.isSuccessful(), Toast.LENGTH_SHORT).show();
+
+                if (!task.isSuccessful()) {
+                    Toast.makeText(SignUpScreen.this, "Authentication failed" + task.getException(), Toast.LENGTH_SHORT).show();
+                } else {
+                    currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                    String fname = user_fname.getText().toString().trim();
+                    String lname = user_lname.getText().toString().trim();
+                    String email = user_email.getText().toString().trim();
+                    String pwd = user_password.getText().toString().trim();
+                    String contact = user_contact.getText().toString().trim();
+                    String gender = rdb.getText().toString().trim();
+                    String bdate = user_birthdate.getText().toString().trim();
+                    String company = txtInput_cmpyName.getSelectedItem().toString();
+                    String exp = txtInput_exp.getSelectedItem().toString();
+                    userId = currentFirebaseUser.getUid();
+
+                    createUser(fname, lname, email, pwd, contact, gender, bdate, company, exp, userId);
+                    startActivity(new Intent(SignUpScreen.this, LoginScreen.class));
+                    Toast.makeText(SignUpScreen.this, "Success", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+
+
+        });
+    }
+
+    private void createUser(String fname, String lname, String email, String pwd, String contact, String gender, String bdate, String company, String exp, String userId) {
+        currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        User user = new User();
+
+        user.setUser_fname(fname);
+        user.setUser_lname(lname);
+        user.setUser_email(email);
+        user.setUser_contact(contact);
+        user.setUser_gender(gender);
+        user.setUser_birthdate(bdate);
+        user.setUser_company(company);
+        user.setUser_experience(exp);
+        user.setUserKey(userId);
+
+        fref.child(currentFirebaseUser.getUid()).setValue(user);
+    }
+
+    private boolean validateNumber() {
+        String MobilePattern = "[0-9]{10}";
+        if (!user_contact.getText().toString().trim().matches(MobilePattern)) {
+            user_contact.setError(getString(R.string.number_size_error));
+            return false;
+        } else {
+            return true;
         }
     }
 

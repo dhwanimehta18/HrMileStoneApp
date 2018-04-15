@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 
 
 
-public class PreferenceManager {
+public class /**/PreferenceManager {
 
     public static PreferenceManager preferenceManager;
     private static SharedPreferences mSharedPreferences;
@@ -27,6 +27,22 @@ public class PreferenceManager {
         mEditor = mSharedPreferences.edit();
         mEditor.putString(key, value);
         mEditor.commit();
+    }
+
+    public static String getprefUserKey(Context context) {
+        mSharedPreferences = context.getSharedPreferences(SHAREDPREFERENCE, Context.MODE_PRIVATE);
+        String strUserkey = mSharedPreferences.getString("USER_KEY", "");
+        return strUserkey;
+    }
+    public static String getprefUserPassword(Context context) {
+        mSharedPreferences = context.getSharedPreferences(SHAREDPREFERENCE, Context.MODE_PRIVATE);
+        String strUserPass = mSharedPreferences.getString("USER_PASS", "");
+        return strUserPass;
+    }
+    public static String getprefImagepath(Context context) {
+        mSharedPreferences = context.getSharedPreferences(SHAREDPREFERENCE, Context.MODE_PRIVATE);
+        String strImpath = mSharedPreferences.getString("IMGPATH", "");
+        return strImpath;
     }
 
     public static String getprefUserId(Context context) {

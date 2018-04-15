@@ -2,6 +2,7 @@ package com.hrmilestoneapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +14,10 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,10 +34,11 @@ import org.json.JSONObject;
 import hp.harsh.library.interfaces.OkHttpInterface;
 import hp.harsh.library.okhttp.OkHttpRequest;
 
-public class LoginScreen extends AppCompatActivity implements View.OnClickListener, OkHttpInterface {
+public class LoginScreen extends AppCompatActivity implements View.OnClickListener {
 
     TextInputEditText et_email, et_password;
     Button btn_login, btn_reset_password, btn_signup;
+    private FirebaseAuth auth;
     private ProgressBar progressBar;
     private static String TAG = SignUpScreen.class.getName();
 
@@ -43,10 +49,21 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        auth = FirebaseAuth.getInstance();
+
+      /*  if (auth.getCurrentUser() != null) {
+
+            startActivity(new Intent(LoginScreen.this, MainActivity.class));
+            finish();
+        }
+*/
+
         setContentView(R.layout.activity_login_screen);
 
         fref = fdatabase.getReference("user");
-        userId = fref.push().getKey();
+        //userId = fref.push().getKey();
 
         et_email = findViewById(R.id.et_email);
         et_password = findViewById(R.id.et_password);
@@ -58,6 +75,7 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
         btn_signup.setOnClickListener(LoginScreen.this);
         btn_reset_password.setOnClickListener(LoginScreen.this);
         btn_login.setOnClickListener(LoginScreen.this);
+        auth = FirebaseAuth.getInstance();
     }
 
     @Override
@@ -67,36 +85,41 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
 
         switch (view.getId()) {
             case R.id.btn_login:
-                if (!validateEmail()) {
+                /*if (!validateEmail()) {
                     return;
                 } else if (!validatePassword()) {
                     return;
-                } else {
-                    fref.addValueEventListener(new ValueEventListener() {
+                } else {*/
+                login();
+                break;
+                    /*fref.addValueEventListener(new ValueEventListener() {
+
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                                 User user = snapshot.getValue(User.class);
                                 String fEmail = user.getUser_email();
                                 String fPassword = user.getUser_password();
-
-                                if (fEmail.equals(et_email.getText().toString().trim()) && fPassword.equals(et_password.getText().toString().trim())) {
+                                Log.e("password", "+_+_+_+_+_+password_+_+_+_+_+_+_" + fPassword);
                                     String fname = user.getUser_fname();
                                     String lastname = user.getUser_lname();
+                                    String email = user.getUser_email();
+                                    String password = user.getUser_password();
+                                    String key = user.getUserKey();
+                                    Log.e("key", "*******key******" + key);
+                                    Log.e("fname", "*******fname******");
+                                    Log.e("password", "*******password******" + password);
 
                                     PreferenceManager.setPref(LoginScreen.this, fname, "USER_FIRSTNAME");
                                     PreferenceManager.setPref(LoginScreen.this, lastname, "USER_LASTNAME");
-                                    PreferenceManager.setPref(LoginScreen.this, fEmail, "USER_EMAIL");
+                                    PreferenceManager.setPref(LoginScreen.this, email, "USER_EMAIL");
+                                    PreferenceManager.setPref(LoginScreen.this, key, "USER_KEY");
+                                    PreferenceManager.setPref(LoginScreen.this, password, "USER_PASS");
 
                                     Intent next = new Intent(LoginScreen.this, MainActivity.class);
                                     startActivity(next);
                                     finish();
 
-                                } else if (fEmail.equals(et_email.getText().toString().trim()) && !fPassword.equals(et_password.getText().toString().trim())) {
-                                    Snackbar.make(view, "Password is incorrect", Snackbar.LENGTH_LONG).show();
-                                } else if (!fEmail.equals(et_email.getText().toString().trim()) && fPassword.equals(et_password.getText().toString().trim())) {
-                                    Snackbar.make(view, "Email is incorrect", Snackbar.LENGTH_LONG).show();
-                                }
                             }
                         }
 
@@ -105,12 +128,11 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
 
                         }
                     });
-                    //callAPIforLogin();
-                    next = new Intent(LoginScreen.this, MainActivity.class);
-                    startActivity(next);
-                    break;
-                }
+*/
+            //callAPIforLogin();
+            //}
             case R.id.btn_reset_password:
+                forgotpassword();
                 break;
             case R.id.btn_signup:
                 next = new Intent(LoginScreen.this, SignUpScreen.class);
@@ -119,15 +141,92 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
         }
     }
 
-    private void callAPIforLogin() {
 
-        new OkHttpRequest(LoginScreen.this,
-                OkHttpRequest.Method.POST,
-                ApiManager.USER_LOGIN,
-                RequestParam.userLogin("" + et_email.getText().toString(), "" + et_password.getText().toString()),
-                RequestParam.getNull(),
-                RequestCode.CODE_USER_LOGIN,
-                true, this);
+    private void forgotpassword() {
+        Intent ifo = new Intent(this, Forgot_password.class);
+        startActivity(ifo);
+        finish();
+    }
+
+    private void login() {
+        String email = et_email.getText().toString();
+        final String password = et_password.getText().toString();
+
+        if (TextUtils.isEmpty(email)) {
+            Toast.makeText(LoginScreen.this, "Enter email address!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (TextUtils.isEmpty(password)) {
+            Toast.makeText(LoginScreen.this, "Enter password!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        //progressBar.setVisibility(View.VISIBLE);
+
+        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(LoginScreen.this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                progressBar.setVisibility(View.GONE);
+                if (!task.isSuccessful()) {
+                    if (password.length() < 6) {
+                        et_password.setError(getString(R.string.passworderror));
+                    } else {
+                        Toast.makeText(LoginScreen.this, getString(R.string.auth_failed), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    fref.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                User user = snapshot.getValue(User.class);
+                                String fEmail = user.getUser_email();
+                                String fPassword = user.getUser_password();
+                                if (et_email.getText().toString().trim().equals(fEmail)) {
+                                    Log.e("password", "+_+_+_+_+_+password_+_+_+_+_+_+_" + fPassword);
+                                    String fname = user.getUser_fname();
+                                    String lastname = user.getUser_lname();
+                                    String email = user.getUser_email();
+                                    String password = user.getUser_password();
+                                    String key = user.getUserKey();
+                                    Log.e("key", "*******key******" + key);
+                                    Log.e("fname", "*******fname******");
+                                    Log.e("password", "*******password******" + password);
+                                    PreferenceManager.setPref(LoginScreen.this, fname, "USER_FIRSTNAME");
+                                    PreferenceManager.setPref(LoginScreen.this, lastname, "USER_LASTNAME");
+                                    PreferenceManager.setPref(LoginScreen.this, email, "USER_EMAIL");
+                                    PreferenceManager.setPref(LoginScreen.this, key, "USER_KEY");
+                                    PreferenceManager.setPref(LoginScreen.this, password, "USER_PASS");
+                                }
+                            }
+                            /*Intent next = new Intent(LoginScreen.this, MainActivity.class);
+                            startActivity(next);
+                            finish();*/
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    startActivity(new Intent(LoginScreen.this, MainActivity.class));
+                    finish();
+                }
+            }
+        });
+
+
+        /*private void callAPIforLogin () {
+
+            new OkHttpRequest(LoginScreen.this,
+                    OkHttpRequest.Method.POST,
+                    ApiManager.USER_LOGIN,
+                    RequestParam.userLogin("" + et_email.getText().toString(), "" + et_password.getText().toString()),
+                    RequestParam.getNull(),
+                    RequestCode.CODE_USER_LOGIN,
+                    true, this);
+        }*/
     }
 
     private boolean validatePassword() {
@@ -152,7 +251,7 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
         return !TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
-    @Override
+ /*   @Override
     public void onOkHttpStart(int requestId) {
 
     }
@@ -232,5 +331,5 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
     @Override
     public void onOkHttpFinish(int requestId) {
 
-    }
+    }*/
 }

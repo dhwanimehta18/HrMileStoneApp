@@ -11,15 +11,23 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.hrmilestoneapp.utils.PreferenceManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -33,10 +41,11 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnCli
 
     private int REQUEST_CAMERA = 0, SELECT_FILE = 1;
     private String userChoosenTask;
-
     FirebaseDatabase fdatabase = FirebaseDatabase.getInstance();
     DatabaseReference fref;
     String userId;
+    Toolbar toolbar;
+    Fragment fragment;
 
     String fname, lname, email, contact, company, experience, birthdate, gender;
 
@@ -49,7 +58,10 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnCli
     CircleImageView edit_profile_image;
     Dialog dialog;
     Button btn_edit_profile_picture, btn_remove_picture, btn_take_picture, btn_choose_from_library, btn_cancel_profile_pic;
-
+    private String EMAIL_ID;
+    String encoded;
+    private String USER_KEY;
+    private String imgpath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +71,16 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnCli
         fref = fdatabase.getReference("user");
         userId = fref.push().getKey();
 
-        Log.i("usreId", "userId : " + userId);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
+
+        EMAIL_ID = PreferenceManager.getprefUserEmail(this);
+        Log.i("EMAIL_ID", "EMAIL_ID : " + EMAIL_ID);
+
+        USER_KEY = PreferenceManager.getprefUserKey(this);
+
+        Log.i("USER_KEY", "USER_KEY : " + USER_KEY);
 
 
         et_user_profile_exp = findViewById(R.id.et_user_profile_exp);
@@ -82,46 +103,60 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnCli
         tv_user_gender = findViewById(R.id.tv_user_gender);
         tv_user_birthdate = findViewById(R.id.tv_user_birthdate);
 
+        edit_profile_image = findViewById(R.id.edit_profile_image);
+
+        edit_profile_image.setOnClickListener(EditProfileActivity.this);
+        btn_profile_save.setOnClickListener(this);
 
         btn_edit_profile_picture = findViewById(R.id.btn_edit_profile_picture);
 
-        /*fref.addValueEventListener(new ValueEventListener() {
+        fref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     User user = snapshot.getValue(User.class);
-                    fname = user.getUser_fname();
-                    Log.i("fname", "fname : " + fname);
-                    lname = user.getUser_lname();
-                    email = user.getUser_email();
-                    contact = user.getUser_contact();
-                    company = user.getUser_company();
-                    experience = user.getUser_experience();
-                    gender = user.getUser_gender();
-                    birthdate = user.getUser_birthdate();
+                    String fEmail = user.getUser_email();
+
+                    if (EMAIL_ID.equals(fEmail)) {
+                        fname = user.getUser_fname();
+                        Log.i("fname", "fname : " + fname);
+                        lname = user.getUser_lname();
+                        email = user.getUser_email();
+                        contact = user.getUser_contact();
+                        company = user.getUser_company();
+                        experience = user.getUser_experience();
+                        gender = user.getUser_gender();
+                        birthdate = user.getUser_birthdate();
+                        imgpath = user.getPath();
+                        PreferenceManager.setPref(EditProfileActivity.this, imgpath, "IMGPATH");
+                        if (!(imgpath == null) && !(imgpath == "")) {
+                            byte[] decoded = Base64.decode(imgpath, Base64.DEFAULT);
+                            Bitmap decodedImage = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                            edit_profile_image.setImageBitmap(decodedImage);
+                            Log.e("decoded", "decoded :" + decodedImage);
+                        }
+                        et_user_birthdate.setText(birthdate);
+                        user_profile_f_name.setText(fname);
+                        user_profile_l_name.setText(lname);
+                        profile_email.setText(email);
+                        et_user_profile_contact.setText(contact);
+                        et_user_profile_company.setText(company);
+                        et_user_profile_exp.setText(experience);
+                        et_user_gender.setText(gender);
+
+
+                    }
                 }
 
             }
 
             @Override
+
             public void onCancelled(DatabaseError databaseError) {
 
             }
         });
-
-        et_user_birthdate.setText(birthdate);
-        user_profile_f_name.setText(fname);
-        user_profile_l_name.setText(lname);
-        profile_email.setText(email);
-        et_user_profile_contact.setText(contact);
-        et_user_profile_company.setText(company);
-        et_user_profile_exp.setText(experience);
-        et_user_gender.setText(gender);*/
-
-        edit_profile_image = findViewById(R.id.edit_profile_image);
-
-        edit_profile_image.setOnClickListener(EditProfileActivity.this);
 
 
     }
@@ -136,7 +171,50 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnCli
             case R.id.btn_edit_profile_picture:
                 selectImage();
                 break;
+            case R.id.btn_profile_save:
+                UpdateFirebaseData();
+                toolbar.setTitle(R.string.title_profile);
+                fragment = new ProfileFragment();
+                loadFragment(fragment);
+                break;
+
         }
+    }
+
+    private void loadFragment(Fragment fragment) {
+        // load fragment
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.frameLayout, fragment);
+        transaction.commit();
+    }
+
+    private void UpdateFirebaseData() {
+        String PASSWORD = PreferenceManager.getprefUserPassword(this);
+        Log.i("PASSWORD", "PASSWORD : " + PASSWORD);
+
+       /* User user = new User();
+        user.setUserKey(userId);
+        user.setUser_fname(user_profile_f_name.getText().toString().trim());
+        user.setUser_lname(user_profile_l_name.getText().toString().trim());
+        user.setUser_email(profile_email.getText().toString().trim());
+        user.setUser_contact(et_user_profile_contact.getText().toString().trim());
+        user.setUser_gender(et_user_gender.getText().toString().trim());
+        user.setUser_birthdate(et_user_birthdate.getText().toString().trim());
+        user.setUser_company(et_user_profile_company.getText().toString());
+        user.setUser_experience(et_user_profile_exp.getText().toString());*/
+        //user.setPassword(PASSWORD);
+        //user.setPath(encoded);
+        //fref.child(USER_KEY).child("userKey").setValue(userId);
+        fref.child(USER_KEY).child("user_fname").setValue(user_profile_f_name.getText().toString().trim());
+        fref.child(USER_KEY).child("user_lname").setValue(user_profile_l_name.getText().toString().trim());
+        fref.child(USER_KEY).child("user_email").setValue(profile_email.getText().toString().trim());
+        fref.child(USER_KEY).child("user_birthdate").setValue(et_user_birthdate.getText().toString().trim());
+        fref.child(USER_KEY).child("user_gender").setValue(et_user_gender.getText().toString().trim());
+        fref.child(USER_KEY).child("user_contact").setValue(et_user_profile_contact.getText().toString().trim());
+        fref.child(USER_KEY).child("user_company").setValue(et_user_profile_company.getText().toString());
+        fref.child(USER_KEY).child("user_experience").setValue(et_user_profile_exp.getText().toString());
+        fref.child(USER_KEY).child("path").setValue(encoded);
+
     }
 
     @Override
@@ -234,8 +312,12 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnCli
             e.printStackTrace();
         }
 
+        byte[] byteArray = bytes.toByteArray();
         edit_profile_image.setImageBitmap(thumbnail);
-        Log.i("imagePath", "imagePath : " + thumbnail.toString());
+        encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+        //String strimg = thumbnail.toString();
+        Log.i("encoded", "encoded : " + encoded);
+
     }
 
     @SuppressWarnings("deprecation")
@@ -245,6 +327,15 @@ public class EditProfileActivity extends AppCompatActivity implements View.OnCli
         if (data != null) {
             try {
                 bm = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), data.getData());
+
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                bm.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+
+                byte[] byteArray = bytes.toByteArray();
+                //imgtemp.setImageBitmap(bm);
+                encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                fref.child(USER_KEY).child("path").setValue(encoded);
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

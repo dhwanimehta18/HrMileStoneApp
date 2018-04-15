@@ -19,4 +19,10 @@
     <color name="btn_logut_bg">#ff6861</color>
     <color name="hint_color">#222</color>
     <color name="hrlist_bg">#888</color>
+    <color name="grey_200">#EEEEEE</color>
+    <color name="grey_500">#a4a4a4</color>
+    <color name="grey_100">#F5F5F5</color>
+    <color name="grey_800">#212121</color>
+
+    <color name="black_overlay">#66000000</color>
 </resources>

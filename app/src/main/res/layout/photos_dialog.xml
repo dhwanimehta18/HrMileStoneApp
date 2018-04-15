@@ -10,13 +10,12 @@
     app:behavior_hideable="true"
     app:behavior_peekHeight="56dp">
 
-    <Button
-        android:id="@+id/btn_photos_take_picture"
+    <TextView
+        android:id="@+id/tv_photos_upload_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@null"
         android:foreground="?attr/selectableItemBackground"
-        android:text="@string/take_picture"
         android:textAllCaps="false"
         android:textColor="#3498DB"
         android:textSize="15sp" />
@@ -27,13 +26,12 @@
         android:layout_marginTop="10dp"
         android:background="#777" />
 
-    <Button
-        android:id="@+id/btn_photos_choose_from_library"
+    <TextView
+        android:id="@+id/tv_photo_upload_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@null"
         android:foreground="?attr/selectableItemBackground"
-        android:text="@string/choose_from_library"
         android:textAllCaps="false"
         android:textColor="#3498DB"
         android:textSize="15sp" />
